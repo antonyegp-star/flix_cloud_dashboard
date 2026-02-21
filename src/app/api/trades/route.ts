@@ -6,9 +6,9 @@ const getColumnIndexes = (headers: string[]) => {
     return {
         magic: headers.indexOf("Magic"),
         symbol: headers.indexOf("Symbol"),
-        profit: headers.indexOf("Profit"),
-        mae: headers.indexOf("MAE"),
-        exitReason: headers.indexOf("Razón de salida"),
+        profit: headers.indexOf("Profit_USD"),
+        mae: headers.indexOf("MAE_Points"),
+        exitReason: headers.indexOf("Details/Reason"),
     };
 };
 
@@ -28,14 +28,14 @@ export async function GET() {
         const headers = rows[0];
         const colIndexes = getColumnIndexes(headers);
 
-        const data = rows.slice(1).map((row, index) => {
+        const data = rows.slice(1).map((row: any[], index: number) => {
             return {
                 row: index + 2, // 1-based index, skipping header
-                magic: colIndexes.magic !== -1 ? row[colIndexes.magic] : "",
-                symbol: colIndexes.symbol !== -1 ? row[colIndexes.symbol] : "",
-                profit: colIndexes.profit !== -1 ? row[colIndexes.profit] : "",
-                mae: colIndexes.mae !== -1 ? row[colIndexes.mae] : "",
-                exitReason: colIndexes.exitReason !== -1 ? row[colIndexes.exitReason] : "",
+                magic: colIndexes.magic !== -1 ? (row[colIndexes.magic] || "N/A") : "N/A",
+                symbol: colIndexes.symbol !== -1 ? (row[colIndexes.symbol] || "N/A") : "N/A",
+                profit: colIndexes.profit !== -1 ? (row[colIndexes.profit] || "0") : "0",
+                mae: colIndexes.mae !== -1 ? (row[colIndexes.mae] || "0") : "0",
+                exitReason: colIndexes.exitReason !== -1 ? (row[colIndexes.exitReason] || "N/A") : "N/A",
             };
         });
 
