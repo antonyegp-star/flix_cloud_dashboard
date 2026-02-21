@@ -29,4 +29,4 @@ export async function getGoogleSheetsClient() {
 }
 
 export const SPREADSHEET_ID = process.env.NEXT_PUBLIC_SPREADSHEET_ID || ""; // Ensure this is set in .env
-export const SHEET_NAME = "Flix_Data_Master";
+export const SHEET_NAME = "Flix_Audit";
