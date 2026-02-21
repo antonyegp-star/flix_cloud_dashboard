@@ -1,14 +1,7 @@
 import { NextResponse } from "next/server";
 import { getGoogleSheetsClient, SPREADSHEET_ID, SHEET_NAME } from "@/lib/googleSheets";
 
-// Hardcoded indices matching the user's specific CSV output format
-const colIndexes = {
-    symbol: 1,      // Column B
-    magic: 2,       // Column C
-    reason: 6,      // Column G
-    profit: 9,      // Column J
-    mae: 13         // Column N
-};
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
@@ -26,11 +19,11 @@ export async function GET() {
         const data = rows.slice(1).map((row: any[], index: number) => {
             return {
                 row: index + 2, // 1-based index, skipping header
-                magic: row[colIndexes.magic] || "0",
-                symbol: row[colIndexes.symbol] || "N/A",
-                profit: row[colIndexes.profit] || "0",
-                mae: row[colIndexes.mae] || "0",
-                exitReason: row[colIndexes.reason] || "N/A",
+                magic: row[3] || "0",
+                symbol: row[2] || "N/A",
+                profit: row[10] || "0",
+                mae: row[14] || "0",
+                exitReason: row[7] || row[6] || "N/A",
             };
         });
 
@@ -52,41 +45,34 @@ export async function PUT(request: Request) {
         // For this prototype, let's assume `valuesToUpdate` maps column names to new values 
         // and we need to fetch headers first to know which columns to update.
 
-        // For this prototype, we're using hardcoded indices:
-        // magic: C (index 2)
-        // symbol: B (index 1)
-        // profit: J (index 9)
-        // mae: N (index 13)
-        // reason: G (index 6)
-
-        const data = [];
+        const data: any[] = [];
         if (valuesToUpdate.magic !== undefined) {
             data.push({
-                range: `${SHEET_NAME}!C${row}`,
+                range: `${SHEET_NAME}!D${row}`,
                 values: [[valuesToUpdate.magic]],
             });
         }
         if (valuesToUpdate.symbol !== undefined) {
             data.push({
-                range: `${SHEET_NAME}!B${row}`,
+                range: `${SHEET_NAME}!C${row}`,
                 values: [[valuesToUpdate.symbol]],
             });
         }
         if (valuesToUpdate.profit !== undefined) {
             data.push({
-                range: `${SHEET_NAME}!J${row}`,
+                range: `${SHEET_NAME}!K${row}`,
                 values: [[valuesToUpdate.profit]],
             });
         }
         if (valuesToUpdate.mae !== undefined) {
             data.push({
-                range: `${SHEET_NAME}!N${row}`,
+                range: `${SHEET_NAME}!O${row}`,
                 values: [[valuesToUpdate.mae]],
             });
         }
         if (valuesToUpdate.exitReason !== undefined) {
             data.push({
-                range: `${SHEET_NAME}!G${row}`,
+                range: `${SHEET_NAME}!H${row}`,
                 values: [[valuesToUpdate.exitReason]],
             });
         }
