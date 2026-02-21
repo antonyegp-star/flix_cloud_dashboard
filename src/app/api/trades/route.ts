@@ -3,12 +3,13 @@ import { getGoogleSheetsClient, SPREADSHEET_ID, SHEET_NAME } from "@/lib/googleS
 
 // Helper to find the index of columns dynamically
 const getColumnIndexes = (headers: string[]) => {
+    const normalizedHeaders = headers.map(h => typeof h === 'string' ? h.toLowerCase().trim() : '');
     return {
-        magic: headers.indexOf("Magic"),
-        symbol: headers.indexOf("Symbol"),
-        profit: headers.indexOf("Profit_USD"),
-        mae: headers.indexOf("MAE_Points"),
-        exitReason: headers.indexOf("Details/Reason"),
+        magic: normalizedHeaders.indexOf("magic"),
+        symbol: normalizedHeaders.indexOf("symbol"),
+        profit: normalizedHeaders.indexOf("profit_usd"),
+        mae: normalizedHeaders.indexOf("mae_points"),
+        exitReason: normalizedHeaders.indexOf("details/reason"),
     };
 };
 
