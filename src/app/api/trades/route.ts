@@ -19,11 +19,11 @@ export async function GET() {
         const data = rows.slice(1).map((row: any[], index: number) => {
             return {
                 row: index + 2, // 1-based index, skipping header
-                magic: row[3] || "0",
+                time: row[1] || "N/A",
                 symbol: row[2] || "N/A",
+                htf: row[4] || "N/A",
+                magic: row[3] || "0",
                 profit: row[10] || "0",
-                mae: row[14] || "0",
-                exitReason: row[7] || row[6] || "N/A",
             };
         });
 
@@ -46,10 +46,10 @@ export async function PUT(request: Request) {
         // and we need to fetch headers first to know which columns to update.
 
         const data: any[] = [];
-        if (valuesToUpdate.magic !== undefined) {
+        if (valuesToUpdate.time !== undefined) {
             data.push({
-                range: `${SHEET_NAME}!D${row}`,
-                values: [[valuesToUpdate.magic]],
+                range: `${SHEET_NAME}!B${row}`,
+                values: [[valuesToUpdate.time]],
             });
         }
         if (valuesToUpdate.symbol !== undefined) {
@@ -58,22 +58,22 @@ export async function PUT(request: Request) {
                 values: [[valuesToUpdate.symbol]],
             });
         }
+        if (valuesToUpdate.htf !== undefined) {
+            data.push({
+                range: `${SHEET_NAME}!E${row}`,
+                values: [[valuesToUpdate.htf]],
+            });
+        }
+        if (valuesToUpdate.magic !== undefined) {
+            data.push({
+                range: `${SHEET_NAME}!D${row}`,
+                values: [[valuesToUpdate.magic]],
+            });
+        }
         if (valuesToUpdate.profit !== undefined) {
             data.push({
                 range: `${SHEET_NAME}!K${row}`,
                 values: [[valuesToUpdate.profit]],
-            });
-        }
-        if (valuesToUpdate.mae !== undefined) {
-            data.push({
-                range: `${SHEET_NAME}!O${row}`,
-                values: [[valuesToUpdate.mae]],
-            });
-        }
-        if (valuesToUpdate.exitReason !== undefined) {
-            data.push({
-                range: `${SHEET_NAME}!H${row}`,
-                values: [[valuesToUpdate.exitReason]],
             });
         }
 

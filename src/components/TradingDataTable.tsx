@@ -46,11 +46,11 @@ export default function TradingDataTable() {
     const handleEdit = (record: TradeRecord) => {
         setEditingRow(record.row);
         setEditValues({
-            magic: record.magic,
+            time: record.time,
             symbol: record.symbol,
+            htf: record.htf,
+            magic: record.magic,
             profit: record.profit,
-            mae: record.mae,
-            exitReason: record.exitReason,
         });
     };
 
@@ -68,11 +68,11 @@ export default function TradingDataTable() {
                 body: JSON.stringify({
                     row,
                     valuesToUpdate: {
-                        magic: editValues.magic,
+                        time: editValues.time,
                         symbol: editValues.symbol,
+                        htf: editValues.htf,
+                        magic: editValues.magic,
                         profit: editValues.profit,
-                        mae: editValues.mae,
-                        exitReason: editValues.exitReason,
                     }
                 }),
             });
@@ -98,11 +98,11 @@ export default function TradingDataTable() {
                 <table className="w-full text-sm text-left">
                     <thead className="bg-muted text-muted-foreground uppercase text-xs font-semibold">
                         <tr>
-                            <th className="px-6 py-4">Magic</th>
+                            <th className="px-6 py-4">Fecha</th>
                             <th className="px-6 py-4">Símbolo</th>
-                            <th className="px-6 py-4">Profit</th>
-                            <th className="px-6 py-4">MAE</th>
-                            <th className="px-6 py-4">Razón Salida</th>
+                            <th className="px-6 py-4">HTF</th>
+                            <th className="px-6 py-4">Magia</th>
+                            <th className="px-6 py-4">Ganancia</th>
                             <th className="px-6 py-4 text-right">Acciones</th>
                         </tr>
                     </thead>
@@ -117,12 +117,12 @@ export default function TradingDataTable() {
                                     <td className="px-6 py-4 text-primary font-medium">
                                         {isEditing ? (
                                             <input
-                                                className="bg-background border border-border rounded p-1 w-24"
-                                                value={editValues.magic || ""}
-                                                onChange={(e) => setEditValues({ ...editValues, magic: e.target.value })}
+                                                className="bg-background border border-border rounded p-1 w-32"
+                                                value={editValues.time || ""}
+                                                onChange={(e) => setEditValues({ ...editValues, time: e.target.value })}
                                             />
                                         ) : (
-                                            record.magic
+                                            record.time
                                         )}
                                     </td>
                                     <td className="px-6 py-4">
@@ -138,9 +138,31 @@ export default function TradingDataTable() {
                                             </span>
                                         )}
                                     </td>
+                                    <td className="px-6 py-4">
+                                        {isEditing ? (
+                                            <input
+                                                className="bg-background border border-border rounded p-1 w-24"
+                                                value={editValues.htf || ""}
+                                                onChange={(e) => setEditValues({ ...editValues, htf: e.target.value })}
+                                            />
+                                        ) : (
+                                            record.htf
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        {isEditing ? (
+                                            <input
+                                                className="bg-background border border-border rounded p-1 w-24"
+                                                value={editValues.magic || ""}
+                                                onChange={(e) => setEditValues({ ...editValues, magic: e.target.value })}
+                                            />
+                                        ) : (
+                                            record.magic
+                                        )}
+                                    </td>
                                     <td className={`px-6 py-4 font-bold ${typeof record.profit === "string" && record.profit.includes("-")
-                                            ? "text-destructive"
-                                            : "text-green-500"
+                                        ? "text-destructive"
+                                        : "text-green-500"
                                         }`}>
                                         {isEditing ? (
                                             <input
@@ -150,28 +172,6 @@ export default function TradingDataTable() {
                                             />
                                         ) : (
                                             record.profit
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        {isEditing ? (
-                                            <input
-                                                className="bg-background border border-border rounded p-1 w-24"
-                                                value={editValues.mae || ""}
-                                                onChange={(e) => setEditValues({ ...editValues, mae: e.target.value })}
-                                            />
-                                        ) : (
-                                            record.mae
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        {isEditing ? (
-                                            <input
-                                                className="bg-background border border-border rounded p-1 w-40"
-                                                value={editValues.exitReason || ""}
-                                                onChange={(e) => setEditValues({ ...editValues, exitReason: e.target.value })}
-                                            />
-                                        ) : (
-                                            <span className="text-secondary-foreground/80">{record.exitReason}</span>
                                         )}
                                     </td>
                                     <td className="px-6 py-4 text-right">

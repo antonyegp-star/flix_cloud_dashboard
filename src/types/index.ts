@@ -1,9 +1,9 @@
 export interface TradeRecord {
     row: number; // The row number in Google Sheets
-    magic: string;
+    time: string;
     symbol: string;
+    htf: string;
+    magic: string;
     profit: string;
-    mae: string;
-    exitReason: string;
     [key: string]: string | number;
 }
