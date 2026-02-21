@@ -1,16 +1,13 @@
 import { NextResponse } from "next/server";
 import { getGoogleSheetsClient, SPREADSHEET_ID, SHEET_NAME } from "@/lib/googleSheets";
 
-// Helper to find the index of columns dynamically
-const getColumnIndexes = (headers: string[]) => {
-    const normalizedHeaders = headers.map(h => typeof h === 'string' ? h.toLowerCase().trim() : '');
-    return {
-        magic: normalizedHeaders.indexOf("magic"),
-        symbol: normalizedHeaders.indexOf("symbol"),
-        profit: normalizedHeaders.indexOf("profit_usd"),
-        mae: normalizedHeaders.indexOf("mae_points"),
-        exitReason: normalizedHeaders.indexOf("details/reason"),
-    };
+// Hardcoded indices matching the user's specific CSV output format
+const colIndexes = {
+    symbol: 1,      // Column B
+    magic: 2,       // Column C
+    reason: 6,      // Column G
+    profit: 9,      // Column J
+    mae: 13         // Column N
 };
 
 export async function GET() {
@@ -26,17 +23,14 @@ export async function GET() {
             return NextResponse.json({ data: [] });
         }
 
-        const headers = rows[0];
-        const colIndexes = getColumnIndexes(headers);
-
         const data = rows.slice(1).map((row: any[], index: number) => {
             return {
                 row: index + 2, // 1-based index, skipping header
-                magic: colIndexes.magic !== -1 ? (row[colIndexes.magic] || "N/A") : "N/A",
-                symbol: colIndexes.symbol !== -1 ? (row[colIndexes.symbol] || "N/A") : "N/A",
-                profit: colIndexes.profit !== -1 ? (row[colIndexes.profit] || "0") : "0",
-                mae: colIndexes.mae !== -1 ? (row[colIndexes.mae] || "0") : "0",
-                exitReason: colIndexes.exitReason !== -1 ? (row[colIndexes.exitReason] || "N/A") : "N/A",
+                magic: row[colIndexes.magic] || "0",
+                symbol: row[colIndexes.symbol] || "N/A",
+                profit: row[colIndexes.profit] || "0",
+                mae: row[colIndexes.mae] || "0",
+                exitReason: row[colIndexes.reason] || "N/A",
             };
         });
 
@@ -58,43 +52,41 @@ export async function PUT(request: Request) {
         // For this prototype, let's assume `valuesToUpdate` maps column names to new values 
         // and we need to fetch headers first to know which columns to update.
 
-        const headResponse = await sheets.spreadsheets.values.get({
-            spreadsheetId: SPREADSHEET_ID,
-            range: `${SHEET_NAME}!1:1`,
-        });
+        // For this prototype, we're using hardcoded indices:
+        // magic: C (index 2)
+        // symbol: B (index 1)
+        // profit: J (index 9)
+        // mae: N (index 13)
+        // reason: G (index 6)
 
-        const headers = headResponse.data.values?.[0] || [];
-        const colIndexes = getColumnIndexes(headers);
-
-        // Create an update array
         const data = [];
-        if (valuesToUpdate.magic && colIndexes.magic !== -1) {
+        if (valuesToUpdate.magic !== undefined) {
             data.push({
-                range: `${SHEET_NAME}!${String.fromCharCode(65 + colIndexes.magic)}${row}`,
+                range: `${SHEET_NAME}!C${row}`,
                 values: [[valuesToUpdate.magic]],
             });
         }
-        if (valuesToUpdate.symbol && colIndexes.symbol !== -1) {
+        if (valuesToUpdate.symbol !== undefined) {
             data.push({
-                range: `${SHEET_NAME}!${String.fromCharCode(65 + colIndexes.symbol)}${row}`,
+                range: `${SHEET_NAME}!B${row}`,
                 values: [[valuesToUpdate.symbol]],
             });
         }
-        if (valuesToUpdate.profit && colIndexes.profit !== -1) {
+        if (valuesToUpdate.profit !== undefined) {
             data.push({
-                range: `${SHEET_NAME}!${String.fromCharCode(65 + colIndexes.profit)}${row}`,
+                range: `${SHEET_NAME}!J${row}`,
                 values: [[valuesToUpdate.profit]],
             });
         }
-        if (valuesToUpdate.mae && colIndexes.mae !== -1) {
+        if (valuesToUpdate.mae !== undefined) {
             data.push({
-                range: `${SHEET_NAME}!${String.fromCharCode(65 + colIndexes.mae)}${row}`,
+                range: `${SHEET_NAME}!N${row}`,
                 values: [[valuesToUpdate.mae]],
             });
         }
-        if (valuesToUpdate.exitReason && colIndexes.exitReason !== -1) {
+        if (valuesToUpdate.exitReason !== undefined) {
             data.push({
-                range: `${SHEET_NAME}!${String.fromCharCode(65 + colIndexes.exitReason)}${row}`,
+                range: `${SHEET_NAME}!G${row}`,
                 values: [[valuesToUpdate.exitReason]],
             });
         }
