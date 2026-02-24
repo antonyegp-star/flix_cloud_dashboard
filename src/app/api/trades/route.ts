@@ -16,16 +16,20 @@ export async function GET() {
             return NextResponse.json({ data: [] });
         }
 
-        const data = rows.slice(1).map((row: any[], index: number) => {
-            return {
-                row: index + 2, // 1-based index, skipping header
-                time: row[1] || "N/A",
-                symbol: row[2] || "N/A",
-                htf: row[4] || "N/A",
-                magic: row[3] || "0",
-                profit: row[10] || "0",
-            };
-        });
+        const data = rows
+            .slice(1)
+            .map((row: any[], index: number) => {
+                return {
+                    row: index + 2, // 1-based index, skipping header
+                    time: row[1] || "N/A",
+                    symbol: row[2] || "N/A",
+                    htf: row[4] || "N/A",
+                    magic: row[3] || "0",
+                    profit: row[10] || "0",
+                    status: row[16] || "ACTIVE", // Column Q
+                };
+            })
+            .filter((item: any) => item.status !== "DELETED");
 
         // Parseo y Ordenamiento (Descending) con validación segura
         data.sort((a: any, b: any) => {
