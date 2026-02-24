@@ -27,27 +27,58 @@ export async function GET() {
             };
         });
 
-        // Parseo y Ordenamiento (Descending)
+        // Parseo y Ordenamiento (Descending) con validación segura
         data.sort((a: any, b: any) => {
             const parseDate = (dateStr: string) => {
-                if (!dateStr || dateStr === "N/A") return 0;
-                const [datePart, timePart] = dateStr.split(' ');
-                if (!datePart || !timePart) return 0;
-                const [year, month, day] = datePart.split('.');
-                const [hour, minute, second] = timePart.split(':');
-                return new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second)).getTime();
+                try {
+                    if (!dateStr || typeof dateStr !== 'string' || dateStr.trim() === "" || dateStr === "N/A") return 0;
+                    const parts = dateStr.split(' ');
+                    if (parts.length < 2) return 0;
+
+                    const datePart = parts[0];
+                    const timePart = parts[1];
+                    const dateParts = datePart.split('.');
+                    const timeParts = timePart.split(':');
+
+                    if (dateParts.length !== 3 || timeParts.length < 2) return 0;
+
+                    const [year, month, day] = dateParts;
+                    const [hour, minute, second = "0"] = timeParts;
+
+                    const time = new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second)).getTime();
+                    return isNaN(time) ? 0 : time;
+                } catch (error) {
+                    return 0; // Fecha de respaldo segura (equivale a 1/1/1970, o bien mandarlo al final)
+                }
             };
             return parseDate(b.time) - parseDate(a.time);
         });
 
-        // Formateo de Salida
+        // Formateo de Salida Seguro
         data.forEach((item: any) => {
-            if (item.time && item.time !== "N/A") {
-                const [datePart, timePart] = item.time.split(' ');
-                if (datePart && timePart) {
-                    const [year, month, day] = datePart.split('.');
-                    item.time = `${day}/${month}/${year} ${timePart}`;
+            try {
+                if (!item.time || typeof item.time !== 'string' || item.time.trim() === "" || item.time === "N/A") {
+                    item.time = "Fecha Inválida";
+                    return;
                 }
+
+                const parts = item.time.split(' ');
+                if (parts.length >= 2) {
+                    const datePart = parts[0];
+                    const timePart = parts[1];
+                    const dateParts = datePart.split('.');
+
+                    if (dateParts.length === 3) {
+                        const [year, month, day] = dateParts;
+                        item.time = `${day}/${month}/${year} ${timePart}`;
+                    } else {
+                        item.time = "Fecha Inválida";
+                    }
+                } else {
+                    item.time = "Fecha Inválida";
+                }
+            } catch (error) {
+                item.time = "Fecha Inválida";
             }
         });
 
