@@ -27,6 +27,30 @@ export async function GET() {
             };
         });
 
+        // Parseo y Ordenamiento (Descending)
+        data.sort((a: any, b: any) => {
+            const parseDate = (dateStr: string) => {
+                if (!dateStr || dateStr === "N/A") return 0;
+                const [datePart, timePart] = dateStr.split(' ');
+                if (!datePart || !timePart) return 0;
+                const [year, month, day] = datePart.split('.');
+                const [hour, minute, second] = timePart.split(':');
+                return new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second)).getTime();
+            };
+            return parseDate(b.time) - parseDate(a.time);
+        });
+
+        // Formateo de Salida
+        data.forEach((item: any) => {
+            if (item.time && item.time !== "N/A") {
+                const [datePart, timePart] = item.time.split(' ');
+                if (datePart && timePart) {
+                    const [year, month, day] = datePart.split('.');
+                    item.time = `${day}/${month}/${year} ${timePart}`;
+                }
+            }
+        });
+
         return NextResponse.json({ data });
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
