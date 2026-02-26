@@ -6,27 +6,34 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { ticket, time, symbol, magic, profit, reason } = body;
+        const {
+            ticket, time, symbol, magic, htf, ltf,
+            type, reason, entry, exit, profit_usd,
+            profit_pts, trail, mfe, mae, eff
+        } = body;
 
         const sheets = await getGoogleSheetsClient();
 
-        // Build a row array mapping to the specific columns as requested
-        // Col A (0): Ticket
-        // Col B (1): Time
-        // Col C (2): Symbol
-        // Col D (3): Magic
-        // Col E (4): HTF (empty for now)
-        // Col F (5): Type
-        // Col G (6): Reason
-        // Col K (10): Profit
-
-        const rowData = new Array(15).fill("");
-        rowData[0] = ticket || "";
-        rowData[1] = time || "";
-        rowData[2] = symbol || "";
-        rowData[3] = magic || "";
-        rowData[6] = reason || "";
-        rowData[10] = profit || "0";
+        // Build a strict 17-element array mapping to Columns A-Q
+        const rowData = [
+            ticket ?? "",         // Col A (0): ticket
+            time ?? "",           // Col B (1): time
+            symbol ?? "",         // Col C (2): symbol
+            magic ?? "",          // Col D (3): magic
+            htf ?? "",            // Col E (4): htf
+            ltf ?? "",            // Col F (5): ltf
+            type || "TRADE_EXIT", // Col G (6): type (fallback TRADE_EXIT)
+            reason ?? "",         // Col H (7): reason (Closed: PROFIT / LOSS)
+            entry ?? "0",         // Col I (8): entry
+            exit ?? "0",          // Col J (9): exit
+            profit_usd ?? "0",    // Col K (10): profit_usd
+            profit_pts ?? "0",    // Col L (11): profit_pts
+            trail ?? "0",         // Col M (12): trail
+            mfe ?? "0",           // Col N (13): mfe
+            mae ?? "0",           // Col O (14): mae
+            eff ?? "0",           // Col P (15): eff
+            "ACTIVE"              // Col Q (16): Logical delete status
+        ];
 
         await sheets.spreadsheets.values.append({
             spreadsheetId: SPREADSHEET_ID,
