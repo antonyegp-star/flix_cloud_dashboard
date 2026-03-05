@@ -6,6 +6,8 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
+        
+        // 1. Limpieza: Única desestructuración limpia con los 16 campos exactos
         const {
             ticket, time, symbol, magic, htf, ltf,
             type, reason, entry, exit, profit_usd,
@@ -14,7 +16,15 @@ export async function POST(request: Request) {
 
         const sheets = await getGoogleSheetsClient();
 
-        // Build a strict 17-element array mapping to Columns A-Q
+        // 2. Lógica de Bifurcación (Routing)
+        // Detectamos si proviene del bot Step Index (por nombre o magic)
+        let targetSheet = SHEET_NAME; // Por defecto: "Flix_Audit" (o lo que tengas definido en env)
+        
+        if ((symbol && symbol.includes("Step")) || magic === "777888" || magic === 777888) {
+            targetSheet = "Step_Audit";
+        }
+
+        // 3. Construcción estricta del Array de 17 elementos (Columnas A-Q)
         const rowData = [
             ticket ?? "",         // Col A (0): ticket
             time ?? "",           // Col B (1): time
@@ -35,9 +45,10 @@ export async function POST(request: Request) {
             "ACTIVE"              // Col Q (16): Logical delete status
         ];
 
+        // 4. Inserción dinámica usando targetSheet
         await sheets.spreadsheets.values.append({
             spreadsheetId: SPREADSHEET_ID,
-            range: `${SHEET_NAME}!A:Z`,
+            range: `${targetSheet}!A:Z`,
             valueInputOption: "USER_ENTERED",
             insertDataOption: "INSERT_ROWS",
             requestBody: {
@@ -45,7 +56,7 @@ export async function POST(request: Request) {
             },
         });
 
-        return NextResponse.json({ success: true }, { status: 200 });
+        return NextResponse.json({ success: true, target: targetSheet }, { status: 200 });
     } catch (error: any) {
         console.error("Webhook Error:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
